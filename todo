@@ -1,0 +1,28 @@
+sudo apt-get install postgresql postgresql-contrib
+sudo vim /etc/postgresql/9.5/main/pg_hba.conf
+заменить там все peer на md5
+sudo /etc/init.d/postgresql reload
+
+sudo apt-get install python-psycopg2
+sudo apt-get install libpq-dev
+sudo pip3 install psycopg2 sqlalchemy
+
+
+
+
+
+sudo -u postgres psql
+
+postgres=# CREATE DATABASE tennis;
+CREATE DATABASE
+postgres=# CREATE USER federer WITH PASSWORD 'grandestslam';
+CREATE ROLE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE tennis TO federer;
+GRANT
+
+
+
+Links:
+https://suhas.org/sqlalchemy-tutorial
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04
+https://help.ubuntu.com/community/PostgreSQL
