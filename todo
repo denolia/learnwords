@@ -7,10 +7,6 @@ sudo apt-get install python-psycopg2
 sudo apt-get install libpq-dev
 sudo pip3 install psycopg2 sqlalchemy
 
-
-
-
-
 sudo -u postgres psql
 
 postgres=# CREATE DATABASE tennis;
@@ -26,3 +22,33 @@ Links:
 https://suhas.org/sqlalchemy-tutorial
 https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04
 https://help.ubuntu.com/community/PostgreSQL
+
+---------------------
+MACCCC:
+
+brew services start postgresql
+brew services stop postgresql
+
+psql -U postgres
+postgres=# CREATE DATABASE learnwords_db;
+CREATE DATABASE
+postgres=# CREATE USER learnwords WITH PASSWORD 'learnwords';
+CREATE ROLE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE learnwords_db TO learnwords;
+GRANT
+postgres=# \q
+
+psql -U learnwords -d learnwords_db
+
+schema.sql
+
+data.sql
+
+#1
+SELECT id, word, translation, pronunciation
+    FROM words
+    WHERE username = 'daniilbubnov'
+    AND repeat_after > '1994-11-28'
+    ORDER BY repeat_after DESC;
+
+
