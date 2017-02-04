@@ -5,14 +5,14 @@ import time
 
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
-from db import add_word_for_user, get_words_to_repeat
+from db import add_word_for_user, get_words_to_repeat, get_translation_for_word
+from words import add_word, show_next_word, check_how_many_to_learn, show_translation, word_fetched
 
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     print(content_type, chat_type, chat_id)
 
-    pprint(msg)
     username = msg['from']['username']
 
     if content_type != 'text':
@@ -22,54 +22,34 @@ def handle(msg):
     command = msg['text'].strip().lower()
     date = msg['date']
 
-    # Tells who has sent you how many messages
     if command.startswith('/word'):
-        args = command.replace('/word', '').strip().split(";")
-        word = args[0].strip()
-        if word is "":
-            bot.sendMessage(chat_id=chat_id, text="Формат: /word word [; перевод; произношение]."
-                                                                 "\nПример: /word cat; котик; кЭт")
-            return
-        translation = args[1].strip() if len(args) > 1 else None
-        pronunciation = args[2].strip() if len(args) > 2 else None
-
-        try:
-            add_word_for_user(word, translation, pronunciation, date, username)
-            bot.sendMessage(chat_id, 'The word is added')
-        except Exception as e:
-            bot.sendMessage(chat_id, 'Cannot insert word: {}'.format(e))
-            print("Cannot insert")
-
-    # read next sender's messages
+        add_word(bot, msg, command, chat_id)
     elif command == '/showall':
         bot.sendMessage(chat_id, str("not implemented yet"))
 
     elif command == '/howmany':
-        try:
-            words_to_repeat = get_words_to_repeat(date, username)
-            pprint(words_to_repeat)
-            num = len(words_to_repeat)
-            bot.sendMessage(chat_id, 'There are {} words to repeat'.format(num))
-        except Exception as e:
-            bot.sendMessage(chat_id, 'Cannot insert word: {}'.format(e))
-            print("Cannot insert")
+        check_how_many_to_learn(bot, chat_id, date, username)
 
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='', callback_data='press')],
-        ])
-
-        bot.sendMessage(chat_id, 'Use inline keyboard', reply_markup=keyboard)
-
-    elif command == '/начать':
-
+    elif command == '/learn':
         print("it works")
 
 
 def on_callback_query(msg):
     query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
     print('Callback Query:', query_id, from_id, query_data)
+    chat_id = msg['message']['chat']['id']
+    date = msg['message']['date']
+    username = msg['from']['username']
+    # bot.answerCallbackQuery(query_id, text='Got it')
+    if query_data == 'start_learning':
+        show_next_word(bot, chat_id, query_id, date, username)
+    if query_data.startswith('show_back_side'):
+        show_translation(bot, chat_id, query_id, query_data, username)
+    if query_data.startswith('fetched'):
+        word_fetched(bot, chat_id, query_id, query_data, date, 0, username)
+    if query_data.startswith('not_fetched'):
+        word_fetched(bot, chat_id, query_id, query_data, date, -1, username)
 
-    bot.answerCallbackQuery(query_id, text='Got it')
 
 if __name__ == '__main__':
     TOKEN = 'TOKEN'
