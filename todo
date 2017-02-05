@@ -5,16 +5,17 @@ sudo /etc/init.d/postgresql reload
 
 sudo apt-get install python-psycopg2
 sudo apt-get install libpq-dev
-sudo pip3 install psycopg2 sqlalchemy
+sudo pip3 install psycopg2
 
-sudo -u postgres psql
+sudo -u postgres psql -U learnwords -d learnwords_db
 
-postgres=# CREATE DATABASE tennis;
+postgres=# CREATE DATABASE learnwords_db;
 CREATE DATABASE
-postgres=# CREATE USER federer WITH PASSWORD 'grandestslam';
+postgres=# CREATE USER learnwords WITH PASSWORD 'learnwords';
 CREATE ROLE
-postgres=# GRANT ALL PRIVILEGES ON DATABASE tennis TO federer;
+postgres=# GRANT ALL PRIVILEGES ON DATABASE learnwords_db TO learnwords;
 GRANT
+
 
 
 

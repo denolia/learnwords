@@ -1,10 +1,9 @@
-import datetime
 from pprint import pprint
 
 import telepot
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 
-from db import add_word_for_user, get_one_word_to_repeat, get_words_to_repeat, get_translation_for_word, \
+from db import add_word_for_user, get_one_word_to_repeat, count_words_to_repeat, get_word_by_id, \
     set_fetched_word
 
 message_with_inline_keyboard = None
@@ -32,7 +31,7 @@ def add_word(bot, msg, command, chat_id):
     pronunciation = args[2].strip() if len(args) > 2 else None
 
     try:
-        add_word_for_user(word, translation, pronunciation, date, username)
+        add_word_for_user(word, translation, pronunciation, date, 1, username)
         bot.sendMessage(chat_id, 'The word is added')
     except Exception as e:
         bot.sendMessage(chat_id, 'Cannot insert word: {}'.format(e))
@@ -43,22 +42,22 @@ def check_how_many_to_learn(bot, chat_id, date, username):
 
     words_to_repeat = None
     try:
-        words_to_repeat = get_words_to_repeat(date, username)
+        words_to_repeat = count_words_to_repeat(date, username)
         pprint(words_to_repeat)
 
     except Exception as e:
-        bot.sendMessage(chat_id, 'Cannot insert word: {}'.format(e))
-        print("Cannot insert")
-    if words_to_repeat:
-        num = len(words_to_repeat)
-
+        bot.sendMessage(chat_id, 'Cannot count words to repeat {}'.format(e))
+        print("Cannot count words to repeat")
+    if words_to_repeat > 0:
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='Start learning', callback_data='start_learning')],
         ])
         global message_with_inline_keyboard
         message_with_inline_keyboard = bot.sendMessage(chat_id,
-                                                       'There are {} words to repeat'.format(num),
+                                                       'There are {} words to repeat'.format(words_to_repeat),
                                                        reply_markup=keyboard)
+    else:
+        bot.sendMessage(chat_id, 'There are no words to repeat. Take a cup of tea')
 
 
 def stop_learning(bot, chat_id):
@@ -91,11 +90,10 @@ def show_next_word(bot, chat_id, query_id, date, username):
         bot.sendMessage(chat_id, 'Cannot fetch a word: {}'.format(e))
         print("Cannot fetch a word")
 
-    if word_to_repeat and len(word_to_repeat) > 1:
-        global message_with_inline_keyboard
-
-        if message_with_inline_keyboard:
-            msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+    global message_with_inline_keyboard
+    if message_with_inline_keyboard:
+        msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+        if word_to_repeat is not None:
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Show back side',
                                       callback_data='show_back_side_{}'.format(word_to_repeat[0]))],
@@ -103,17 +101,18 @@ def show_next_word(bot, chat_id, query_id, date, username):
             bot.editMessageText(msg_idf, '{}'.format(word_to_repeat[1]),
                                 reply_markup=keyboard)
         else:
-            bot.answerCallbackQuery(query_id,
-                                    text='No previous message to edit')
+            stop_learning(bot, chat_id)
+    else:
+        bot.answerCallbackQuery(query_id,
+                                text='No previous message to edit')
 
 
 def show_translation(bot, chat_id, query_id, query_data, username):
     word_id = query_data.replace('show_back_side_', '')
     # go to the db and fetch all for the word
-
     word_info = None
     try:
-        word_info = get_translation_for_word(word_id, username)
+        word_info = get_word_by_id(word_id, username)
         pprint(word_info)
 
     except Exception as e:
@@ -132,7 +131,10 @@ def show_translation(bot, chat_id, query_id, query_data, username):
                                       callback_data='fetched_{}'.format(word_info[0]))
                  ]
             ])
-            bot.editMessageText(msg_idf, '{}\n{}\n{}'.format(word_info[1], word_info[2], word_info[3]),
+            word = word_info[1] if word_info[1] is not None else ""
+            translation = word_info[2] if word_info[2] is not None else ""
+            pronunciation = word_info[3] if word_info[3] is not None else ""
+            bot.editMessageText(msg_idf, '{}\n{}\n{}'.format(word, translation, pronunciation),
                                 reply_markup=keyboard)
         else:
             bot.answerCallbackQuery(query_id,
@@ -152,12 +154,13 @@ def word_fetched(bot, chat_id, query_id, query_data, date_unix, status, username
     direction = 0
     try:
         int(word_id)
-        set_fetched_word(word_id, date_unix, direction, status,  username)
+        repeat_after = set_fetched_word(word_id, date_unix, direction, status, username)
         #todo after what?
         bot.answerCallbackQuery(query_id,
-                                text="We will repeat it after {}".format(datetime.date.fromtimestamp(date_unix)))
+                                text="We will repeat it after {}".format(repeat_after))
     except Exception as e:
         bot.sendMessage(chat_id, 'Cannot fetch a word: {}'.format(e))
         print("Cannot fetch a word")
+        print(e)
 
     show_next_word(bot, chat_id, query_id, date_unix, username)

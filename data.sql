@@ -1,20 +1,20 @@
-INSERT INTO words VALUES (default, 'fun', 'fun', 'fun', '1994-11-01', '1994-11-04', 'julia_vikulina');
-INSERT INTO words VALUES (default, 'joy', 'joy', 'joy', '1994-11-02', '1994-11-06', 'daniilbubnov');
-INSERT INTO words VALUES (default, 'rest', 'rest', 'rest', '1994-11-03', '1994-11-08', 'julia_vikulina');
-INSERT INTO words VALUES (default, 'love', 'love', 'love', '1994-11-04', '1994-11-10', 'daniilbubnov');
-INSERT INTO words VALUES (default, 'courage', 'courage', 'courage', '1994-11-05', '1994-11-12', 'julia_vikulina');
-INSERT INTO words VALUES (default, 'kindness', 'kindness', 'kindness', '1994-11-06', '1994-11-14', 'daniilbubnov');
-INSERT INTO words VALUES (default, 'inspiration', 'inspiration', 'inspiration', '1994-11-07', '1994-11-16', 'julia_vikulina');
-INSERT INTO words VALUES (default, 'nonconformism', 'nonconformism', 'nonconformism', '1994-11-08', '1994-11-18', 'daniilbubnov');
-INSERT INTO words VALUES (default, 'serenity', 'serenity', 'serenity', '1994-11-09', '1994-11-20', 'julia_vikulina');
-INSERT INTO repetitions VALUES (default, 1, 'daniilbubnov',  '1994-11-01', 0, 1);
-INSERT INTO repetitions VALUES (default, 1, 'julia_vikulina',  '1994-11-02', 1, -1);
+INSERT INTO words VALUES (default, 'fun', 'fun', 'fun', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina');
+INSERT INTO words VALUES (default, 'joy', 'joy', 'joy', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'daniilbubnov');
+INSERT INTO words VALUES (default, 'rest', 'rest', 'rest', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina');
+INSERT INTO words VALUES (default, 'love', 'love', 'love', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'daniilbubnov');
+INSERT INTO words VALUES (default, 'courage', 'courage', 'courage', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina');
+INSERT INTO words VALUES (default, 'kindness', 'kindness', 'kindness', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'daniilbubnov');
+INSERT INTO words VALUES (default, 'inspiration', 'inspiration', 'inspiration', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina');
+INSERT INTO words VALUES (default, 'nonconformism', 'nonconformism', 'nonconformism','2017-02-05 13:33:14.406647+03','2017-02-05 13:33:14.406647+03', '0', 'daniilbubnov');
+INSERT INTO words VALUES (default, 'serenity', 'serenity', 'serenity', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina');
+INSERT INTO repetitions VALUES (default, 1, 'daniilbubnov','2017-02-05 13:33:14.406647+03', 0, 1);
+INSERT INTO repetitions VALUES (default, 1, 'julia_vikulina','2017-02-05 13:33:14.406647+03', 1, 1);
 
-INSERT INTO repetitions VALUES (default, 2, 'daniilbubnov',  '1994-11-01', 0, 0);
-INSERT INTO repetitions VALUES (default, 2, 'julia_vikulina',  '1994-11-02', 1, 1);
+INSERT INTO repetitions VALUES (default, 2, 'daniilbubnov','2017-02-05 13:33:14.406647+03', 0, 0);
+INSERT INTO repetitions VALUES (default, 2, 'julia_vikulina','2017-02-05 13:33:14.406647+03', 1, 1);
 
-INSERT INTO repetitions VALUES (default, 3, 'daniilbubnov',  '1994-11-01', 0, 1);
-INSERT INTO repetitions VALUES (default, 4, 'julia_vikulina',  '1994-11-02', 1, -1);
+INSERT INTO repetitions VALUES (default, 3, 'daniilbubnov','2017-02-05 13:33:14.406647+03', 0, 1);
+INSERT INTO repetitions VALUES (default, 4, 'julia_vikulina','2017-02-05 13:33:14.406647+03', 1, 0);
 
-INSERT INTO repetitions VALUES (default, 4, 'daniilbubnov',  '1994-11-01', 0, 0);
-INSERT INTO repetitions VALUES (default, 5, 'julia_vikulina',  '1994-11-02', 1, 1);
+INSERT INTO repetitions VALUES (default, 4, 'daniilbubnov','2017-02-05 13:33:14.406647+03', 0, 0);
+INSERT INTO repetitions VALUES (default, 5, 'julia_vikulina','2017-02-05 13:33:14.406647+03', 1, 1);

@@ -1,7 +1,7 @@
+from datetime import datetime, timedelta
 from pprint import pprint
 
 import psycopg2
-from datetime import date
 
 conn = psycopg2.connect(dbname='learnwords_db', user='learnwords', host='localhost', password='learnwords')
 conn.autocommit = True
@@ -16,41 +16,46 @@ print(ver)
 # ver = cur.fetchall()
 # pprint(ver)
 
+fetch_koeff = dict(fetched=2, not_fetched=1)
+
 
 def get_words_by_user(username):
     cur.execute("SELECT * FROM words")
     response = cur.fetchall()
     pprint(response)
 
+
 def update_repeat_after(word_id, repeat_after, username):
     # TODO implement
     pass
 
 
-def add_word_for_user(word, translation, pronunciation, date_unix, username):
-    last_repeated = date.fromtimestamp(date_unix)
+def add_word_for_user(word, translation, pronunciation, last_repeated, delta, username):
     # TODO calculate repeat_after
-    repeat_after = date.fromtimestamp(date_unix)
-    cur.execute("""INSERT INTO words VALUES (default, %s, %s, %s, %s, %s, %s)""",
+    last_repeated_datetime = datetime.fromtimestamp(last_repeated)
+    interval = timedelta(days=delta)
+    repeat_after = last_repeated_datetime + interval
+    cur.execute("""INSERT INTO words VALUES (default, %s, %s, %s, %s, %s, %s, %s)""",
                 (word, translation, pronunciation,
-                 last_repeated, repeat_after, username))
+                 last_repeated_datetime,
+                 repeat_after, interval, username))
 
 
-def get_words_to_repeat(date_unix, username):
-    repeat_after = date.fromtimestamp(date_unix)
-    cur.execute("SELECT id FROM words WHERE username=%s AND repeat_after<=%s",
+def count_words_to_repeat(date_unix, username):
+    repeat_after = datetime.fromtimestamp(date_unix)
+    cur.execute("SELECT count(*) FROM words WHERE username=%s AND repeat_after<=%s",
                 (username, repeat_after))
-    return cur.fetchall()
+    return cur.fetchone()[0]
 
 
 def get_one_word_to_repeat(date_unix, username):
-    repeat_after = date.fromtimestamp(date_unix)
-    cur.execute("SELECT id, word FROM words WHERE username=%s AND repeat_after<=%s LIMIT 1",
+    repeat_after = datetime.fromtimestamp(date_unix)
+    cur.execute("SELECT id, word FROM words WHERE username=%s AND repeat_after<=%s ORDER BY repeat_after DESC LIMIT 1",
                 (username, repeat_after))
     return cur.fetchone()
 
 
-def get_translation_for_word(word_id, username):
+def get_word_by_id(word_id, username):
     cur.execute("SELECT * FROM words WHERE id=%s AND username<=%s LIMIT 1",
                 (word_id, username))
     return cur.fetchone()
@@ -61,15 +66,25 @@ def set_fetched_word(word_id,
                      direction,
                      status,
                      username):
+    last_repeated = datetime.fromtimestamp(date_unix)
 
-    last_repeated = date.fromtimestamp(date_unix)
-    # todo calculate repeat_after
-    repeat_after = date.fromtimestamp(date_unix)
-    cur.execute("UPDATE words SET last_repeated=%s, repeat_after=%s WHERE id=%s AND username=%s",
-                (last_repeated, repeat_after, word_id, username))
+    word = get_word_by_id(word_id, username)
+    delta = timedelta(minutes=1)
+    if status == 0:
+        delta = word[6] * fetch_koeff['fetched']
+    elif status == -1:
+        delta = word[6] * fetch_koeff['not_fetched']
+
+    if delta == timedelta(0):
+        delta = timedelta(days=1)
+
+    repeat_after = last_repeated + delta
+    cur.execute("UPDATE words SET last_repeated=%s, repeat_after=%s, delta=%s WHERE id=%s AND username=%s",
+                (last_repeated, repeat_after, delta, word_id, username))
     cur.execute("""INSERT INTO repetitions VALUES (default, %s, %s, %s, %s, %s)""",
                 (word_id, username, last_repeated, direction, status))
     print("Number of rows updated: %d".format(cur.rowcount))
+    return repeat_after
 
 
 def update_translation_of_word_for_user(word_id, translation,  username):

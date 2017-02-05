@@ -4,8 +4,9 @@ CREATE TABLE words (
     word            varchar(100),
     translation     varchar(100),
     pronunciation   varchar(80),
-    last_repeated   date,
-    repeat_after    date,
+    last_repeated   timestamp,
+    repeat_after    timestamp,
+    delta           interval,
     username        varchar(80)
 );
 DROP TABLE IF EXISTS repetitions CASCADE;
@@ -13,7 +14,7 @@ CREATE TABLE repetitions (
     id              BigSerial NOT NULL primary key,
     word_id         int references words(id),
     username        varchar(80),
-    date            date,
+    date            timestamp,
     direction       int,
     status          int
 );
