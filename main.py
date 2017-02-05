@@ -1,12 +1,9 @@
-import telepot
-from pprint import pprint
-
 import time
 
-from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+import telepot
 
-from db import add_word_for_user, get_words_to_repeat, get_translation_for_word
-from words import add_word, show_next_word, check_how_many_to_learn, show_translation, word_fetched
+from words import add_word, show_next_word, check_how_many_to_learn, show_translation, word_fetched, stop_learning, \
+    edit_word, show_statistics, show_controls
 
 
 def handle(msg):
@@ -21,17 +18,26 @@ def handle(msg):
 
     command = msg['text'].strip().lower()
     date = msg['date']
-
-    if command.startswith('/word'):
+    if command == '/start':
+        show_controls(bot, chat_id)
+    elif command.startswith('/word'):
         add_word(bot, msg, command, chat_id)
     elif command == '/showall':
         bot.sendMessage(chat_id, str("not implemented yet"))
-
     elif command == '/howmany':
         check_how_many_to_learn(bot, chat_id, date, username)
-
     elif command == '/learn':
-        print("it works")
+        check_how_many_to_learn(bot, chat_id, date, username)
+        # [KeyboardButton(text='Stop learning'), KeyboardButton(text='Edit word')],
+        # [KeyboardButton(text='Show statistics')]
+    elif command == 'start learning':
+        check_how_many_to_learn(bot, chat_id, date, username)
+    elif command == 'stop learning':
+        stop_learning(bot, chat_id)
+    elif command == 'edit word':
+        edit_word(bot, chat_id)
+    elif command == 'show statistics':
+        show_statistics(bot, chat_id)
 
 
 def on_callback_query(msg):

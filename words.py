@@ -2,12 +2,20 @@ import datetime
 from pprint import pprint
 
 import telepot
-from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 
 from db import add_word_for_user, get_one_word_to_repeat, get_words_to_repeat, get_translation_for_word, \
     set_fetched_word
 
 message_with_inline_keyboard = None
+
+
+def show_controls(bot, chat_id):
+    markup = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text='Start learning'), KeyboardButton(text='Stop learning')],
+        [KeyboardButton(text='Edit word'), KeyboardButton(text='Show statistics')]
+    ], resize_keyboard=True)
+    bot.sendMessage(chat_id, 'Hello! See buttons below to control your lesson', reply_markup=markup)
 
 
 def add_word(bot, msg, command, chat_id):
@@ -32,6 +40,7 @@ def add_word(bot, msg, command, chat_id):
 
 
 def check_how_many_to_learn(bot, chat_id, date, username):
+
     words_to_repeat = None
     try:
         words_to_repeat = get_words_to_repeat(date, username)
@@ -50,6 +59,26 @@ def check_how_many_to_learn(bot, chat_id, date, username):
         message_with_inline_keyboard = bot.sendMessage(chat_id,
                                                        'There are {} words to repeat'.format(num),
                                                        reply_markup=keyboard)
+
+
+def stop_learning(bot, chat_id):
+    global message_with_inline_keyboard
+    msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+    if message_with_inline_keyboard:
+        bot.editMessageText(msg_idf, 'A nice lesson! See you.',
+                            reply_markup=None)
+        message_with_inline_keyboard = None
+    else:
+        bot.sendMessage(chat_id, 'Nothing to stop')
+        print("Cannot fetch a word")
+
+
+def edit_word(bot, chat_id):
+    bot.sendMessage(chat_id, 'Not implemented yet')
+
+
+def show_statistics(bot, chat_id):
+    bot.sendMessage(chat_id, 'Not implemented yet')
 
 
 def show_next_word(bot, chat_id, query_id, date, username):
