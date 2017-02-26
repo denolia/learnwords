@@ -31,7 +31,7 @@ def add_word(bot, msg, command, chat_id):
     pronunciation = args[2].strip() if len(args) > 2 else None
 
     try:
-        add_word_for_user(word, translation, pronunciation, date, 1, username)
+        add_word_for_user(word, translation, pronunciation, date, 0, username)
         bot.sendMessage(chat_id, 'The word is added')
     except Exception as e:
         bot.sendMessage(chat_id, 'Cannot insert word: {}'.format(e))
@@ -62,8 +62,8 @@ def check_how_many_to_learn(bot, chat_id, date, username):
 
 def stop_learning(bot, chat_id):
     global message_with_inline_keyboard
-    msg_idf = telepot.message_identifier(message_with_inline_keyboard)
     if message_with_inline_keyboard:
+        msg_idf = telepot.message_identifier(message_with_inline_keyboard)
         bot.editMessageText(msg_idf, 'A nice lesson! See you.',
                             reply_markup=None)
         message_with_inline_keyboard = None

@@ -7,7 +7,8 @@ CREATE TABLE words (
     last_repeated   timestamp,
     repeat_after    timestamp,
     delta           interval,
-    username        varchar(80)
+    username        varchar(80),
+    learnt          boolean
 );
 DROP TABLE IF EXISTS repetitions CASCADE;
 CREATE TABLE repetitions (

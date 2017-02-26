@@ -25,25 +25,29 @@ def get_words_by_user(username):
     pprint(response)
 
 
-def update_repeat_after(word_id, repeat_after, username):
-    # TODO implement
-    pass
-
-
 def add_word_for_user(word, translation, pronunciation, last_repeated, delta, username):
-    # TODO calculate repeat_after
     last_repeated_datetime = datetime.fromtimestamp(last_repeated)
     interval = timedelta(days=delta)
     repeat_after = last_repeated_datetime + interval
-    cur.execute("""INSERT INTO words VALUES (default, %s, %s, %s, %s, %s, %s, %s)""",
+    learnt = bool(0)
+    cur.execute("""INSERT INTO words VALUES (default, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 (word, translation, pronunciation,
                  last_repeated_datetime,
-                 repeat_after, interval, username))
+                 repeat_after, interval, username, learnt))
+
+
+def set_word_learnt(word_id, date_unix, username):
+    last_repeated = datetime.fromtimestamp(date_unix)
+    delta = timedelta(days=1)
+    repeat_after = last_repeated + delta
+    # TODO debug this
+    cur.execute("UPDATE words SET learnt=%s, last_repeated=%s, delta=%s WHERE id=%s AND username=%s",
+                (last_repeated, repeat_after, delta, word_id, username))
 
 
 def count_words_to_repeat(date_unix, username):
     repeat_after = datetime.fromtimestamp(date_unix)
-    cur.execute("SELECT count(*) FROM words WHERE username=%s AND repeat_after<=%s",
+    cur.execute("SELECT count(*) FROM words WHERE username=%s AND learnt=1 AND repeat_after<=%s",
                 (username, repeat_after))
     return cur.fetchone()[0]
 

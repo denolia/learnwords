@@ -1,22 +1,31 @@
 sudo apt-get install postgresql postgresql-contrib
-sudo vim /etc/postgresql/9.5/main/pg_hba.conf
-заменить там все peer на md5
-sudo /etc/init.d/postgresql reload
+
+
 
 sudo apt-get install python-psycopg2
 sudo apt-get install libpq-dev
 sudo pip3 install psycopg2
+sudo pip3 install telepot
 
-sudo -u postgres psql -U learnwords -d learnwords_db
-
-postgres=# CREATE DATABASE learnwords_db;
-CREATE DATABASE
-postgres=# CREATE USER learnwords WITH PASSWORD 'learnwords';
-CREATE ROLE
-postgres=# GRANT ALL PRIVILEGES ON DATABASE learnwords_db TO learnwords;
-GRANT
+[sudo -u postgres ] psql -U postgres
+если не сумеешь залогиниться, то
+sudo vim /etc/postgresql/9.5/main/pg_hba.conf
+заменить там все peer на md5, а для postgres поставить trust
+sudo /etc/init.d/postgresql reload
 
 
+CREATE DATABASE learnwords_db;
+
+CREATE USER learnwords WITH PASSWORD 'learnwords';
+
+GRANT ALL PRIVILEGES ON DATABASE learnwords_db TO learnwords;
+
+ALTER USER postgres PASSWORD 'postgres';
+
+sudo vim /etc/postgresql/9.5/main/pg_hba.conf
+заменить там trust на md5 для postgres
+sudo /etc/init.d/postgresql reload
+[sudo -u postgres ]psql -U learnwords -d learnwords_db
 
 
 Links:
@@ -53,3 +62,5 @@ SELECT id, word, translation, pronunciation
     ORDER BY repeat_after DESC;
 
 
+alter table words add column learnt boolean;
+alter table words alter column learnt set default '0';
