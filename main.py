@@ -2,8 +2,8 @@ import time
 
 import telepot
 
-from words import add_word, show_next_word, check_how_many_to_learn, show_translation, word_fetched, stop_learning, \
-    edit_word, show_statistics, show_controls
+from words import add_word, show_next_word_to_repeat, check_how_many_to_repeat, show_translation, word_fetched, stop_lesson, \
+    edit_word, show_statistics, show_controls, check_how_many_to_learn
 
 
 def handle(msg):
@@ -24,16 +24,14 @@ def handle(msg):
         add_word(bot, msg, command, chat_id)
     elif command == '/showall':
         bot.sendMessage(chat_id, str("not implemented yet"))
-    elif command == '/howmany':
-        check_how_many_to_learn(bot, chat_id, date, username)
-    elif command == '/learn':
-        check_how_many_to_learn(bot, chat_id, date, username)
-        # [KeyboardButton(text='Stop learning'), KeyboardButton(text='Edit word')],
-        # [KeyboardButton(text='Show statistics')]
+    elif command == '/repeat':
+        check_how_many_to_repeat(bot, chat_id, date, username)
     elif command == 'start learning':
-        check_how_many_to_learn(bot, chat_id, date, username)
-    elif command == 'stop learning':
-        stop_learning(bot, chat_id)
+        check_how_many_to_learn(bot, chat_id, username)
+    elif command == 'start repetition':
+        check_how_many_to_repeat(bot, chat_id, date, username)
+    elif command == 'stop repetition':
+        stop_lesson(bot, chat_id)
     elif command == 'edit word':
         edit_word(bot, chat_id)
     elif command == 'show statistics':
@@ -48,12 +46,14 @@ def on_callback_query(msg):
     username = msg['from']['username']
     # bot.answerCallbackQuery(query_id, text='Got it')
     if query_data == 'start_learning':
-        show_next_word(bot, chat_id, query_id, date, username)
-    if query_data.startswith('show_back_side'):
+        show_next_word_to_learn(bot, chat_id, query_id, date, username)
+    elif query_data == 'start_repetition':
+        show_next_word_to_repeat(bot, chat_id, query_id, date, username)
+    elif query_data.startswith('show_back_side'):
         show_translation(bot, chat_id, query_id, query_data, username)
-    if query_data.startswith('fetched'):
+    elif query_data.startswith('fetched'):
         word_fetched(bot, chat_id, query_id, query_data, date, 0, username)
-    if query_data.startswith('not_fetched'):
+    elif query_data.startswith('not_fetched'):
         word_fetched(bot, chat_id, query_id, query_data, date, -1, username)
 
 

@@ -3,7 +3,7 @@ from pprint import pprint
 
 import psycopg2
 
-conn = psycopg2.connect(dbname='learnwords_db', user='learnwords', host='localhost', password='learnwords')
+conn = psycopg2.connect(dbname='learnwords_db', user='learnwords', host='192.168.1.64', password='learnwords')
 conn.autocommit = True
 
 print(conn)
@@ -16,11 +16,12 @@ print(ver)
 # ver = cur.fetchall()
 # pprint(ver)
 
+# TODO move this to settings
 fetch_koeff = dict(fetched=2, not_fetched=1)
 
 
 def get_words_by_user(username):
-    cur.execute("SELECT * FROM words")
+    cur.execute("SELECT * FROM words WHERE username=%s", (username, ))
     response = cur.fetchall()
     pprint(response)
 
@@ -38,18 +39,31 @@ def add_word_for_user(word, translation, pronunciation, last_repeated, delta, us
 
 def set_word_learnt(word_id, date_unix, username):
     last_repeated = datetime.fromtimestamp(date_unix)
-    delta = timedelta(days=1)
+    delta = timedelta(days=1)   # TODO move this to settings
     repeat_after = last_repeated + delta
     # TODO debug this
-    cur.execute("UPDATE words SET learnt=%s, last_repeated=%s, delta=%s WHERE id=%s AND username=%s",
-                (last_repeated, repeat_after, delta, word_id, username))
+    cur.execute("UPDATE words SET learnt=%s, last_repeated=%s, repeat_after=%s, delta=%s WHERE id=%s AND username=%s",
+                (True, last_repeated, repeat_after, delta, word_id, username))
+
+
+def count_words_to_learn(username):
+    cur.execute("SELECT count(*) FROM words WHERE username=%s AND learnt=FALSE",
+                (username, ))
+    return cur.fetchone()[0]
 
 
 def count_words_to_repeat(date_unix, username):
     repeat_after = datetime.fromtimestamp(date_unix)
-    cur.execute("SELECT count(*) FROM words WHERE username=%s AND learnt=1 AND repeat_after<=%s",
+    cur.execute("SELECT count(*) FROM words WHERE username=%s AND learnt=FALSE AND repeat_after<=%s",
                 (username, repeat_after))
     return cur.fetchone()[0]
+
+
+def get_one_word_to_learn(username):
+
+    cur.execute("SELECT * FROM words WHERE username=%s AND learnt=FALSE LIMIT 1",
+                (username, ))
+    return cur.fetchone()
 
 
 def get_one_word_to_repeat(date_unix, username):

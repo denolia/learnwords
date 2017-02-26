@@ -1,16 +1,21 @@
 from pprint import pprint
 
+import logging
 import telepot
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 
 from db import add_word_for_user, get_one_word_to_repeat, count_words_to_repeat, get_word_by_id, \
-    set_fetched_word
+    set_fetched_word, count_words_to_learn, get_one_word_to_learn
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 message_with_inline_keyboard = None
 
 
 def show_controls(bot, chat_id):
     markup = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text='Start repetition'), KeyboardButton(text='Stop repetition')],
         [KeyboardButton(text='Start learning'), KeyboardButton(text='Stop learning')],
         [KeyboardButton(text='Edit word'), KeyboardButton(text='Show statistics')]
     ], resize_keyboard=True)
@@ -33,24 +38,48 @@ def add_word(bot, msg, command, chat_id):
     try:
         add_word_for_user(word, translation, pronunciation, date, 0, username)
         bot.sendMessage(chat_id, 'The word is added')
+        logging.info("Added word: {} {} {} for user {}".format(word, translation, pronunciation, username))
     except Exception as e:
         bot.sendMessage(chat_id, 'Cannot insert word: {}'.format(e))
         print("Cannot insert")
+        logging.error(e)
+        raise e
 
 
-def check_how_many_to_learn(bot, chat_id, date, username):
+def check_how_many_to_learn(bot, chat_id, username):
+    try:
+        words_to_learn = count_words_to_learn(username)
+        logging.info("Words to learn: {}".format(words_to_learn))
+    except Exception as e:
+        bot.sendMessage(chat_id, 'Cannot count words to repeat {}'.format(e))
+        logging.error(e)
+        raise e
 
-    words_to_repeat = None
+    if words_to_learn > 0:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text='Start learning', callback_data='start_learning')],
+        ])
+        global message_with_inline_keyboard
+        message_with_inline_keyboard = bot.sendMessage(chat_id,
+                                                       'There are {} words to learn'.format(words_to_learn),
+                                                       reply_markup=keyboard)
+    else:
+        bot.sendMessage(chat_id, 'There are no words to learn. Add them using /word command')
+
+
+def check_how_many_to_repeat(bot, chat_id, date, username):
     try:
         words_to_repeat = count_words_to_repeat(date, username)
         pprint(words_to_repeat)
 
     except Exception as e:
         bot.sendMessage(chat_id, 'Cannot count words to repeat {}'.format(e))
-        print("Cannot count words to repeat")
+        logging.error(e)
+        raise e
+
     if words_to_repeat > 0:
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Start learning', callback_data='start_learning')],
+            [InlineKeyboardButton(text='Start repetition', callback_data='start_repetition')],
         ])
         global message_with_inline_keyboard
         message_with_inline_keyboard = bot.sendMessage(chat_id,
@@ -60,7 +89,7 @@ def check_how_many_to_learn(bot, chat_id, date, username):
         bot.sendMessage(chat_id, 'There are no words to repeat. Take a cup of tea')
 
 
-def stop_learning(bot, chat_id):
+def stop_lesson(bot, chat_id):
     global message_with_inline_keyboard
     if message_with_inline_keyboard:
         msg_idf = telepot.message_identifier(message_with_inline_keyboard)
@@ -69,7 +98,7 @@ def stop_learning(bot, chat_id):
         message_with_inline_keyboard = None
     else:
         bot.sendMessage(chat_id, 'Nothing to stop')
-        print("Cannot fetch a word")
+        logging.info("Nothing to stop")
 
 
 def edit_word(bot, chat_id):
@@ -80,7 +109,34 @@ def show_statistics(bot, chat_id):
     bot.sendMessage(chat_id, 'Not implemented yet')
 
 
-def show_next_word(bot, chat_id, query_id, date, username):
+def show_next_word_to_learn(bot, chat_id, query_id, date, username):
+    word_to_learn = None
+    try:
+        word_to_learn = get_one_word_to_learn(username)
+        pprint(word_to_learn)
+
+    except Exception as e:
+        bot.sendMessage(chat_id, 'Cannot fetch a word: {}'.format(e))
+        print("Cannot fetch a word")
+
+    global message_with_inline_keyboard
+    if message_with_inline_keyboard:
+        msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+        if word_to_learn is not None:
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Show back side',
+                                      callback_data='show_back_side_{}'.format(word_to_learn[0]))],
+            ])
+            bot.editMessageText(msg_idf, '{}'.format(word_to_learn[1]),
+                                reply_markup=keyboard)
+        else:
+            stop_lesson(bot, chat_id)
+    else:
+        bot.answerCallbackQuery(query_id,
+                                text='No previous message to edit')
+
+
+def show_next_word_to_repeat(bot, chat_id, query_id, date, username):
     word_to_repeat = None
     try:
         word_to_repeat = get_one_word_to_repeat(date, username)
@@ -101,7 +157,7 @@ def show_next_word(bot, chat_id, query_id, date, username):
             bot.editMessageText(msg_idf, '{}'.format(word_to_repeat[1]),
                                 reply_markup=keyboard)
         else:
-            stop_learning(bot, chat_id)
+            stop_lesson(bot, chat_id)
     else:
         bot.answerCallbackQuery(query_id,
                                 text='No previous message to edit')
@@ -163,4 +219,4 @@ def word_fetched(bot, chat_id, query_id, query_data, date_unix, status, username
         print("Cannot fetch a word")
         print(e)
 
-    show_next_word(bot, chat_id, query_id, date_unix, username)
+    show_next_word_to_repeat(bot, chat_id, query_id, date_unix, username)

@@ -61,6 +61,5 @@ SELECT id, word, translation, pronunciation
     AND repeat_after > '1994-11-28'
     ORDER BY repeat_after DESC;
 
+alter table words add column learnt boolean default '0';
 
-alter table words add column learnt boolean;
-alter table words alter column learnt set default '0';
