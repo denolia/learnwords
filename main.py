@@ -2,8 +2,10 @@ import time
 
 import telepot
 
-from words import add_word, show_next_word_to_repeat, check_how_many_to_repeat, show_translation, word_fetched, stop_lesson, \
-    edit_word, show_statistics, show_controls, check_how_many_to_learn
+from words import add_word, show_next_word_to_repeat, check_how_many_to_repeat, show_translation_to_learn, \
+    update_word_learn, stop_lesson, \
+    edit_word, show_statistics, show_controls, check_how_many_to_learn, show_next_word_to_learn, \
+    show_translation_to_repeat, update_word_repeat
 
 
 def handle(msg):
@@ -35,7 +37,7 @@ def handle(msg):
     elif command == 'edit word':
         edit_word(bot, chat_id)
     elif command == 'show statistics':
-        show_statistics(bot, chat_id)
+        show_statistics(bot, chat_id, username)
 
 
 def on_callback_query(msg):
@@ -49,12 +51,18 @@ def on_callback_query(msg):
         show_next_word_to_learn(bot, chat_id, query_id, date, username)
     elif query_data == 'start_repetition':
         show_next_word_to_repeat(bot, chat_id, query_id, date, username)
-    elif query_data.startswith('show_back_side'):
-        show_translation(bot, chat_id, query_id, query_data, username)
-    elif query_data.startswith('fetched'):
-        word_fetched(bot, chat_id, query_id, query_data, date, 0, username)
-    elif query_data.startswith('not_fetched'):
-        word_fetched(bot, chat_id, query_id, query_data, date, -1, username)
+    elif query_data.startswith('show_back_side_learn_'):
+        show_translation_to_learn(bot, chat_id, query_id, query_data, username)
+    elif query_data.startswith('show_back_side_repeat_'):
+        show_translation_to_repeat(bot, chat_id, query_id, query_data, username)
+    elif query_data.startswith('learnt_'):
+        update_word_learn(bot, chat_id, query_id, query_data, date, 2, username)
+    elif query_data.startswith('not_learnt_'):
+        update_word_learn(bot, chat_id, query_id, query_data, date, 1, username)
+    elif query_data.startswith('repeated_'):
+        update_word_repeat(bot, chat_id, query_id, query_data, date, 0, username)
+    elif query_data.startswith('not_repeated_'):
+        update_word_repeat(bot, chat_id, query_id, query_data, date, -1, username)
 
 
 if __name__ == '__main__':

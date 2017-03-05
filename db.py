@@ -30,38 +30,42 @@ def add_word_for_user(word, translation, pronunciation, last_repeated, delta, us
     last_repeated_datetime = datetime.fromtimestamp(last_repeated)
     interval = timedelta(days=delta)
     repeat_after = last_repeated_datetime + interval
-    learnt = bool(0)
-    cur.execute("""INSERT INTO words VALUES (default, %s, %s, %s, %s, %s, %s, %s, %s)""",
+    # TODO here to set state depending on what is translation
+    cur.execute("""INSERT INTO words VALUES (default, %s, %s, %s, %s, %s, %s, %s, default)""",
                 (word, translation, pronunciation,
                  last_repeated_datetime,
-                 repeat_after, interval, username, learnt))
+                 repeat_after, interval, username))
 
 
-def set_word_learnt(word_id, date_unix, username):
-    last_repeated = datetime.fromtimestamp(date_unix)
-    delta = timedelta(days=1)   # TODO move this to settings
-    repeat_after = last_repeated + delta
-    # TODO debug this
-    cur.execute("UPDATE words SET learnt=%s, last_repeated=%s, repeat_after=%s, delta=%s WHERE id=%s AND username=%s",
-                (True, last_repeated, repeat_after, delta, word_id, username))
+def count_words(username):
+    cur.execute("SELECT count(*) FROM words WHERE username=%s",
+                (username,))
+    return cur.fetchone()[0]
 
 
 def count_words_to_learn(username):
-    cur.execute("SELECT count(*) FROM words WHERE username=%s AND learnt=FALSE",
+    cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=1",
                 (username, ))
     return cur.fetchone()[0]
 
 
-def count_words_to_repeat(date_unix, username):
-    repeat_after = datetime.fromtimestamp(date_unix)
-    cur.execute("SELECT count(*) FROM words WHERE username=%s AND learnt=FALSE AND repeat_after<=%s",
+def count_words_to_repeat(username):
+    repeat_after = datetime.now()
+    cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=2 AND repeat_after<=%s",
                 (username, repeat_after))
     return cur.fetchone()[0]
 
 
-def get_one_word_to_learn(username):
+def count_words_green(username):
+    cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=2",
+                (username,))
+    num_repeat_state = cur.fetchone()[0]
+    num_ready_to_repeat = count_words_to_repeat(username)
+    return num_repeat_state - num_ready_to_repeat
 
-    cur.execute("SELECT * FROM words WHERE username=%s AND learnt=FALSE LIMIT 1",
+
+def get_one_word_to_learn(username):
+    cur.execute("SELECT * FROM words WHERE username=%s AND state=1 LIMIT 1",
                 (username, ))
     return cur.fetchone()
 
@@ -79,15 +83,11 @@ def get_word_by_id(word_id, username):
     return cur.fetchone()
 
 
-def set_fetched_word(word_id,
-                     date_unix,
-                     direction,
-                     status,
-                     username):
+def set_repeated_word(word_id, date_unix, direction, status, username):
     last_repeated = datetime.fromtimestamp(date_unix)
 
     word = get_word_by_id(word_id, username)
-    delta = timedelta(minutes=1)
+    delta = timedelta(0)
     if status == 0:
         delta = word[6] * fetch_koeff['fetched']
     elif status == -1:
@@ -101,6 +101,23 @@ def set_fetched_word(word_id,
                 (last_repeated, repeat_after, delta, word_id, username))
     cur.execute("""INSERT INTO repetitions VALUES (default, %s, %s, %s, %s, %s)""",
                 (word_id, username, last_repeated, direction, status))
+    print("Number of rows updated: %d".format(cur.rowcount))
+    return repeat_after
+
+
+def set_learnt_word(word_id, date_unix, status, username):
+    last_repeated = datetime.fromtimestamp(date_unix)
+
+    delta = timedelta(days=1)
+
+    if status == 2:
+        repeat_after = last_repeated + delta
+    else:
+        repeat_after = last_repeated
+        delta = timedelta(0)
+
+    cur.execute("UPDATE words SET state=%s, last_repeated=%s, repeat_after=%s, delta=%s WHERE id=%s AND username=%s",
+                (status, last_repeated, repeat_after, delta, word_id, username))
     print("Number of rows updated: %d".format(cur.rowcount))
     return repeat_after
 

@@ -7,6 +7,10 @@ INSERT INTO words VALUES (default, 'kindness', 'kindness', 'kindness', '2017-02-
 INSERT INTO words VALUES (default, 'inspiration', 'inspiration', 'inspiration', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina', default);
 INSERT INTO words VALUES (default, 'nonconformism', 'nonconformism', 'nonconformism','2017-02-05 13:33:14.406647+03','2017-02-05 13:33:14.406647+03', '0', 'daniilbubnov', default);
 INSERT INTO words VALUES (default, 'serenity', 'serenity', 'serenity', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina', default);
+INSERT INTO words VALUES (default, 'fun', 'fun', 'fun', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina', 2);
+INSERT INTO words VALUES (default, 'joy', 'joy', 'joy', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'daniilbubnov', 2);
+INSERT INTO words VALUES (default, 'rest', 'rest', 'rest', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'julia_vikulina', 2);
+INSERT INTO words VALUES (default, 'love', 'love', 'love', '2017-02-05 13:33:14.406647+03', '2017-02-05 13:33:14.406647+03', '0', 'daniilbubnov', 2);
 INSERT INTO repetitions VALUES (default, 1, 'daniilbubnov','2017-02-05 13:33:14.406647+03', 0, 1);
 INSERT INTO repetitions VALUES (default, 1, 'julia_vikulina','2017-02-05 13:33:14.406647+03', 1, 1);
 
