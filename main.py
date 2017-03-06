@@ -1,11 +1,19 @@
+import logging
 import time
 
+import schedule
 import telepot
 
 from words import add_word, show_next_word_to_repeat, check_how_many_to_repeat, show_translation_to_learn, \
     update_word_learn, stop_lesson, \
     edit_word, show_statistics, show_controls, check_how_many_to_learn, show_next_word_to_learn, \
     show_translation_to_repeat, update_word_repeat
+
+CHATS = [0, 0]
+BOT = None
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 
 def handle(msg):
@@ -65,10 +73,23 @@ def on_callback_query(msg):
         update_word_repeat(bot, chat_id, query_id, query_data, date, -1, username)
 
 
+def job():
+    if BOT is not None:
+        for chat in CHATS:
+            bot.sendMessage(chat, 'Hey! Time to learn something'
+                                  '\nOr maybe you have found new words for me? ^__^')
+            logging.debug("sent scheduled message to chat {}".format(chat))
+
+
+# schedule.every(5).seconds.do(job)
+# schedule.every().hour.do(job)
+schedule.every().day.at("10:00").do(job)
+
 if __name__ == '__main__':
     TOKEN = 'TOKEN'
 
     bot = telepot.Bot(TOKEN)
+    BOT = bot
     print(bot.getMe())
     # need to monitor the offset :(
     # response = bot.getUpdates()
@@ -81,4 +102,5 @@ if __name__ == '__main__':
 
     # Keep the program running.
     while 1:
+        schedule.run_pending()
         time.sleep(10)
