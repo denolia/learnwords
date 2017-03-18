@@ -1,24 +1,24 @@
-import logging
 import time
 
 import schedule
 import telepot
 
+import log_conf
 from words import add_word, show_next_word_to_repeat, check_how_many_to_repeat, show_translation_to_learn, \
     update_word_learn, stop_lesson, \
     edit_word, show_statistics, show_controls, check_how_many_to_learn, show_next_word_to_learn, \
     show_translation_to_repeat, update_word_repeat
 
+log = log_conf.get_logger(__name__)
+
 CHATS = [0, 0]
 BOT = None
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
 
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
-    print(content_type, chat_type, chat_id)
+    log.debug("{},{}, {}"
+              .format(content_type, chat_type, chat_id))
 
     username = msg['from']['username']
 
@@ -40,6 +40,8 @@ def handle(msg):
         check_how_many_to_learn(bot, chat_id, username)
     elif command == 'start repetition':
         check_how_many_to_repeat(bot, chat_id, date, username)
+    elif command == 'stop learning':
+        stop_lesson(bot, chat_id)
     elif command == 'stop repetition':
         stop_lesson(bot, chat_id)
     elif command == 'edit word':
@@ -50,13 +52,12 @@ def handle(msg):
 
 def on_callback_query(msg):
     query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
-    print('Callback Query:', query_id, from_id, query_data)
+    log.debug('Callback Query:{} {} {}'.format(query_id, from_id, query_data))
     chat_id = msg['message']['chat']['id']
     date = msg['message']['date']
     username = msg['from']['username']
-    # bot.answerCallbackQuery(query_id, text='Got it')
     if query_data == 'start_learning':
-        show_next_word_to_learn(bot, chat_id, query_id, date, username)
+        show_next_word_to_learn(bot, chat_id, query_id, username)
     elif query_data == 'start_repetition':
         show_next_word_to_repeat(bot, chat_id, query_id, date, username)
     elif query_data.startswith('show_back_side_learn_'):
@@ -78,27 +79,20 @@ def job():
         for chat in CHATS:
             bot.sendMessage(chat, 'Hey! Time to learn something'
                                   '\nOr maybe you have found new words for me? ^__^')
-            logging.debug("sent scheduled message to chat {}".format(chat))
+            log.debug("sent scheduled message to chat {}".format(chat))
 
-
-# schedule.every(5).seconds.do(job)
-# schedule.every().hour.do(job)
-schedule.every().day.at("10:00").do(job)
 
 if __name__ == '__main__':
     TOKEN = 'TOKEN'
+    schedule.every().day.at("7:00").do(job)
 
     bot = telepot.Bot(TOKEN)
     BOT = bot
-    print(bot.getMe())
-    # need to monitor the offset :(
-    # response = bot.getUpdates()
-    # pprint(response)
+    log.info(bot.getMe())
 
     bot.message_loop({'chat': handle,
                       'callback_query': on_callback_query})
-    print('Listening ...')
-    # chat shall exist
+    log.info('Listening ...')
 
     # Keep the program running.
     while 1:
