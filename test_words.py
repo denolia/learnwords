@@ -6,11 +6,6 @@ from telepot.namedtuple import InlineKeyboardMarkup
 
 from words import check_how_many_to_learn, check_how_many_to_repeat
 
-
-def count_words_to_learn(user):
-    return 5;
-
-
 class TestClass:
     @patch('words.compose_kbd_start_learning')
     @patch('words.count_words_to_learn')
