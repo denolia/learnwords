@@ -1,3 +1,9 @@
 logging
 commands and operands getting
-tests
+tests:pytest, mock
+
+coverage
+поискать как в других ботах реализован диалог простыми сообщениями
+на малине в логах эскейпы
+
+впилить енамы вместо дублирования кода

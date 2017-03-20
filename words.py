@@ -56,8 +56,7 @@ def check_how_many_to_learn(bot, chat_id, username):
         raise e
 
     if words_to_learn > 0:
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Start learning', callback_data='start_learning')]])
+        keyboard = compose_kbd_start_learning()
         global message_with_inline_keyboard
         log.debug("message: {}".format(message_with_inline_keyboard))
         message_with_inline_keyboard = bot.sendMessage(chat_id,
@@ -65,6 +64,12 @@ def check_how_many_to_learn(bot, chat_id, username):
                                                        reply_markup=keyboard)
     else:
         bot.sendMessage(chat_id, 'There are no words to learn. Add them using /word command')
+
+
+def compose_kbd_start_learning():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Start learning', callback_data='start_learning')]])
+    return keyboard
 
 
 def check_how_many_to_repeat(bot, chat_id, date, username):
@@ -77,8 +82,7 @@ def check_how_many_to_repeat(bot, chat_id, date, username):
         raise e
 
     if words_to_repeat > 0:
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Start repetition', callback_data='start_repetition')]])
+        keyboard = compose_kbd_start_repeat()
         global message_with_inline_keyboard
         log.debug("message: {}".format(message_with_inline_keyboard))
         message_with_inline_keyboard = bot.sendMessage(chat_id,
@@ -86,6 +90,12 @@ def check_how_many_to_repeat(bot, chat_id, date, username):
                                                        reply_markup=keyboard)
     else:
         bot.sendMessage(chat_id, 'There are no words to repeat. Take a cup of tea')
+
+
+def compose_kbd_start_repeat():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Start repetition', callback_data='start_repetition')]])
+    return keyboard
 
 
 def stop_lesson(bot, chat_id):

@@ -17,7 +17,7 @@ BOT = None
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
-    log.debug("{},{}, {}"
+    log.debug("{}, {}, {}"
               .format(content_type, chat_type, chat_id))
 
     username = msg['from']['username']
