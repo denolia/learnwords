@@ -8,7 +8,7 @@ from words import check_how_many_to_learn, check_how_many_to_repeat
 
 class TestClass:
     @patch('words.compose_kbd_start_learning')
-    @patch('words.count_words_to_learn')
+    @patch('words.count_words_to_mode')
     def test_check_how_many_to_learn(self, count_words_to_learn_mock, compose_kbd_start_learning_mock):
         # TOKEN = '371465282:AAGrzLhIuR1CFZEBVfC-0Gj2bL7Uq60Fv5g'
         bot_mock = telepot.Bot('12345')
@@ -20,7 +20,7 @@ class TestClass:
         bot_mock.sendMessage.assert_called_once_with(123, 'There are 5 words to learn', reply_markup=kbd)
 
     @patch('words.compose_kbd_start_learning')
-    @patch('words.count_words_to_learn')
+    @patch('words.count_words_to_mode')
     def test_check_how_many_to_learn_zero(self, count_words_to_learn_mock, compose_kbd_start_learning_mock):
         # TOKEN = '371465282:AAGrzLhIuR1CFZEBVfC-0Gj2bL7Uq60Fv5g'
         bot_mock = telepot.Bot('12345')
@@ -32,7 +32,7 @@ class TestClass:
         bot_mock.sendMessage.assert_called_once_with(123, 'There are no words to learn. Add them using /word command')
 
     @patch('words.compose_kbd_start_learning')
-    @patch('words.count_words_to_learn')
+    @patch('words.count_words_to_mode')
     def test_check_how_many_to_learn_except(self, count_words_to_learn_mock, compose_kbd_start_learning_mock):
         # TOKEN = '371465282:AAGrzLhIuR1CFZEBVfC-0Gj2bL7Uq60Fv5g'
         bot_mock = telepot.Bot('12345')
@@ -46,7 +46,7 @@ class TestClass:
         bot_mock.sendMessage.assert_called_once_with(123, "Cannot count words to repeat 'Test'")
 
     @patch('words.compose_kbd_start_repeat')
-    @patch('words.count_words_to_repeat')
+    @patch('words.count_words_to_mode')
     def test_check_how_many_to_repeat(self, count_words_to_repeat_mock, compose_kbd_start_repeat_mock):
         # TOKEN = '371465282:AAGrzLhIuR1CFZEBVfC-0Gj2bL7Uq60Fv5g'
         bot_mock = telepot.Bot('12345')
@@ -54,11 +54,11 @@ class TestClass:
         count_words_to_repeat_mock.return_value = 5
         kbd = InlineKeyboardMarkup()
         compose_kbd_start_repeat_mock.return_value = kbd
-        check_how_many_to_repeat(bot_mock, 123, None, 'user')
+        check_how_many_to_repeat(bot_mock, 123, 'user')
         bot_mock.sendMessage.assert_called_once_with(123, 'There are 5 words to repeat', reply_markup=kbd)
 
     @patch('words.compose_kbd_start_repeat')
-    @patch('words.count_words_to_repeat')
+    @patch('words.count_words_to_mode')
     def test_check_how_many_to_repeat_zero(self, count_words_to_learn_mock, compose_kbd_start_learning_mock):
         # TOKEN = '371465282:AAGrzLhIuR1CFZEBVfC-0Gj2bL7Uq60Fv5g'
         bot_mock = telepot.Bot('12345')
@@ -66,11 +66,11 @@ class TestClass:
         count_words_to_learn_mock.return_value = 0
         kbd = InlineKeyboardMarkup()
         compose_kbd_start_learning_mock.return_value = kbd
-        check_how_many_to_repeat(bot_mock, 123, None, 'user')
+        check_how_many_to_repeat(bot_mock, 123, 'user')
         bot_mock.sendMessage.assert_called_once_with(123, 'There are no words to repeat. Take a cup of tea')
 
     @patch('words.compose_kbd_start_repeat')
-    @patch('words.count_words_to_repeat')
+    @patch('words.count_words_to_mode')
     def test_check_how_many_to_repeat_except(self, count_words_to_learn_mock, compose_kbd_start_learning_mock):
         # TOKEN = '371465282:AAGrzLhIuR1CFZEBVfC-0Gj2bL7Uq60Fv5g'
         bot_mock = telepot.Bot('12345')
@@ -79,6 +79,6 @@ class TestClass:
         kbd = InlineKeyboardMarkup()
         compose_kbd_start_learning_mock.return_value = kbd
         with pytest.raises(KeyError):
-            check_how_many_to_repeat(bot_mock, 123, None, 'user')
+            check_how_many_to_repeat(bot_mock, 123, 'user')
 
         bot_mock.sendMessage.assert_called_once_with(123, "Cannot count words to repeat 'Test'")

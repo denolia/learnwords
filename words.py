@@ -4,8 +4,9 @@ from pprint import pformat
 import telepot
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 
-from db import add_word_for_user, get_one_word_to_repeat, count_words_to_repeat, get_word_by_id, \
-    set_learnt_word, count_words_to_learn, get_one_word_to_learn, set_repeated_word, count_words, count_words_green
+from db import add_word_for_user, get_one_word_to_repeat, count_words_to_mode, get_word_by_id, \
+    set_learnt_word, get_one_word_to_learn, set_repeated_word, count_words, count_words_green
+from enums import Mode
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def add_word(bot, msg, command, chat_id):
 def check_how_many_to_learn(bot, chat_id, username):
     log.debug("checking quantity of words to learn and starting the lesson")
     try:
-        words_to_learn = count_words_to_learn(username)
+        words_to_learn = count_words_to_mode(username, Mode.learn)
         log.info("Words to learn: {}".format(words_to_learn))
     except Exception as e:
         bot.sendMessage(chat_id, 'Cannot count words to repeat {}'.format(e))
@@ -72,9 +73,9 @@ def compose_kbd_start_learning():
     return keyboard
 
 
-def check_how_many_to_repeat(bot, chat_id, date, username):
+def check_how_many_to_repeat(bot, chat_id, username):
     try:
-        words_to_repeat = count_words_to_repeat(username)
+        words_to_repeat = count_words_to_mode(username, Mode.repeat)
         log.info("Words to repeat: {}".format(words_to_repeat))
     except Exception as e:
         bot.sendMessage(chat_id, 'Cannot count words to repeat {}'.format(e))
@@ -119,8 +120,8 @@ def edit_word(bot, chat_id):
 
 
 def show_statistics(bot, chat_id, username):
-    num_to_learn = count_words_to_learn(username)
-    num_to_repeat = count_words_to_repeat(username)
+    num_to_learn = count_words_to_mode(username, Mode.learn)
+    num_to_repeat = count_words_to_mode(username, Mode.repeat)
     num_all = count_words(username)
     num_green = count_words_green(username)
     stat = 'You have: ' \

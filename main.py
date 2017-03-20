@@ -35,11 +35,11 @@ def handle(msg):
     elif command == '/showall':
         bot.sendMessage(chat_id, str("not implemented yet"))
     elif command == '/repeat':
-        check_how_many_to_repeat(bot, chat_id, date, username)
+        check_how_many_to_repeat(bot, chat_id, username)
     elif command == 'start learning':
         check_how_many_to_learn(bot, chat_id, username)
     elif command == 'start repetition':
-        check_how_many_to_repeat(bot, chat_id, date, username)
+        check_how_many_to_repeat(bot, chat_id, username)
     elif command == 'stop learning':
         stop_lesson(bot, chat_id)
     elif command == 'stop repetition':

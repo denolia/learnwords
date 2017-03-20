@@ -4,6 +4,8 @@ from pprint import pprint
 
 import psycopg2
 
+from enums import Mode
+
 log = logging.getLogger(__name__)
 
 
@@ -16,13 +18,12 @@ cur.execute('SELECT version()')
 ver = cur.fetchone()
 log.info("Using version: {}".format(ver))
 
-
 # TODO move this to settings
 fetch_koeff = dict(fetched=2, not_fetched=1)
 
 
 def get_words_by_user(username):
-    cur.execute("SELECT * FROM words WHERE username=%s", (username, ))
+    cur.execute("SELECT * FROM words WHERE username=%s", (username,))
     response = cur.fetchall()
     pprint(response)
 
@@ -44,16 +45,14 @@ def count_words(username):
     return cur.fetchone()[0]
 
 
-def count_words_to_learn(username):
-    cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=1",
-                (username, ))
-    return cur.fetchone()[0]
-
-
-def count_words_to_repeat(username):
-    repeat_after = datetime.now()
-    cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=2 AND repeat_after<=%s",
-                (username, repeat_after))
+def count_words_to_mode(username: str, mode: Mode):
+    if mode == Mode.learn:
+        cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=1",
+                    (username,))
+    else:
+        repeat_after = datetime.now()
+        cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=2 AND repeat_after<=%s",
+                    (username, repeat_after))
     return cur.fetchone()[0]
 
 
@@ -67,7 +66,7 @@ def count_words_green(username):
 
 def get_one_word_to_learn(username):
     cur.execute("SELECT * FROM words WHERE username=%s AND state=1 LIMIT 1",
-                (username, ))
+                (username,))
     return cur.fetchone()
 
 
@@ -125,7 +124,7 @@ def set_learnt_word(word_id, date_unix, status, username):
     return repeat_after
 
 
-def update_translation_of_word_for_user(word_id, translation,  username):
+def update_translation_of_word_for_user(word_id, translation, username):
     # TODO what for?
     cur.execute("UPDATE words SET translation=%s WHERE id=%s AND username=%s", (translation, word_id, username))
 
