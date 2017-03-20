@@ -46,56 +46,36 @@ def add_word(bot, msg, command, chat_id):
         raise e
 
 
-def check_how_many_to_learn(bot, chat_id, username):
-    log.debug("checking quantity of words to learn and starting the lesson")
+def check_how_many_to_mode(bot: telepot.Bot, chat_id: int, username: str, mode: Mode):
+    log.debug("checking quantity of words to {mode} and starting the lesson".format(mode=mode.name))
     try:
-        words_to_learn = count_words_to_mode(username, Mode.learn)
-        log.info("Words to learn: {}".format(words_to_learn))
+        words_num = count_words_to_mode(username, mode)
+        log.info("Words to {mode}: {num}".format(mode=mode.name, num=words_num))
     except Exception as e:
-        bot.sendMessage(chat_id, 'Cannot count words to repeat {}'.format(e))
+        bot.sendMessage(chat_id, 'Cannot count words to {mode} {err}'.format(mode=mode.name, err=e))
         log.error(e)
         raise e
 
-    if words_to_learn > 0:
-        keyboard = compose_kbd_start_learning()
+    if words_num > 0:
+        keyboard = compose_kbd_start_mode(mode)
         global message_with_inline_keyboard
         log.debug("message: {}".format(message_with_inline_keyboard))
         message_with_inline_keyboard = bot.sendMessage(chat_id,
-                                                       'There are {} words to learn'.format(words_to_learn),
+                                                       'There are {num} words to {mode}'
+                                                       ''.format(num=words_num, mode=mode.name),
                                                        reply_markup=keyboard)
     else:
-        bot.sendMessage(chat_id, 'There are no words to learn. Add them using /word command')
+        bot.sendMessage(chat_id, 'There are no more words to {mode}'.format(mode=mode.name))
 
 
-def compose_kbd_start_learning():
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text='Start learning', callback_data='start_learning')]])
-    return keyboard
-
-
-def check_how_many_to_repeat(bot, chat_id, username):
-    try:
-        words_to_repeat = count_words_to_mode(username, Mode.repeat)
-        log.info("Words to repeat: {}".format(words_to_repeat))
-    except Exception as e:
-        bot.sendMessage(chat_id, 'Cannot count words to repeat {}'.format(e))
-        log.error(e)
-        raise e
-
-    if words_to_repeat > 0:
-        keyboard = compose_kbd_start_repeat()
-        global message_with_inline_keyboard
-        log.debug("message: {}".format(message_with_inline_keyboard))
-        message_with_inline_keyboard = bot.sendMessage(chat_id,
-                                                       'There are {} words to repeat'.format(words_to_repeat),
-                                                       reply_markup=keyboard)
+def compose_kbd_start_mode(mode: Mode):
+    if mode == Mode.learn:
+        lesson_type = 'learning'
     else:
-        bot.sendMessage(chat_id, 'There are no words to repeat. Take a cup of tea')
-
-
-def compose_kbd_start_repeat():
+        lesson_type = 'repetition'
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text='Start repetition', callback_data='start_repetition')]])
+        [InlineKeyboardButton(text='Start {lesson}'.format(lesson=lesson_type),
+                              callback_data='start_{lesson}'.format(lesson=lesson_type))]])
     return keyboard
 
 
