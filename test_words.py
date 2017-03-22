@@ -33,7 +33,7 @@ class TestClass:
         kbd = InlineKeyboardMarkup()
         compose_kbd_start_mode_mock.return_value = kbd
         check_how_many_to_mode(bot_mock, 123, 'user', mode)
-        bot_mock.sendMessage.assert_called_once_with(123, 'There are no more words to {mode}'.format(mode=mode.name))
+        bot_mock.sendMessage.assert_called_once_with(123, 'There are no words to {mode}'.format(mode=mode.name))
 
     @pytest.mark.parametrize("mode", [Mode.learn, Mode.repeat])
     @patch('words.compose_kbd_start_mode')

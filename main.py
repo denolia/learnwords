@@ -4,9 +4,10 @@ import schedule
 import telepot
 
 import log_conf
-from words import add_word, show_next_word_to_repeat, check_how_many_to_repeat, show_translation_to_learn, \
+from enums import Mode
+from words import add_word, show_next_word_to_repeat, check_how_many_to_mode, show_translation_to_learn, \
     update_word_learn, stop_lesson, \
-    edit_word, show_statistics, show_controls, check_how_many_to_learn, show_next_word_to_learn, \
+    edit_word, show_statistics, show_controls, show_next_word_to_learn, \
     show_translation_to_repeat, update_word_repeat
 
 log = log_conf.get_logger(__name__)
@@ -34,12 +35,10 @@ def handle(msg):
         add_word(bot, msg, command, chat_id)
     elif command == '/showall':
         bot.sendMessage(chat_id, str("not implemented yet"))
-    elif command == '/repeat':
-        check_how_many_to_repeat(bot, chat_id, username)
     elif command == 'start learning':
-        check_how_many_to_learn(bot, chat_id, username)
+        check_how_many_to_mode(bot, chat_id, username, Mode.learn)
     elif command == 'start repetition':
-        check_how_many_to_repeat(bot, chat_id, username)
+        check_how_many_to_mode(bot, chat_id, username, Mode.repeat)
     elif command == 'stop learning':
         stop_lesson(bot, chat_id)
     elif command == 'stop repetition':

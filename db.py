@@ -60,7 +60,7 @@ def count_words_green(username):
     cur.execute("SELECT count(*) FROM words WHERE username=%s AND state=2",
                 (username,))
     num_repeat_state = cur.fetchone()[0]
-    num_ready_to_repeat = count_words_to_repeat(username)
+    num_ready_to_repeat = count_words_to_mode(username, Mode.repeat)
     return num_repeat_state - num_ready_to_repeat
 
 

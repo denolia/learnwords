@@ -65,7 +65,7 @@ def check_how_many_to_mode(bot: telepot.Bot, chat_id: int, username: str, mode: 
                                                        ''.format(num=words_num, mode=mode.name),
                                                        reply_markup=keyboard)
     else:
-        bot.sendMessage(chat_id, 'There are no more words to {mode}'.format(mode=mode.name))
+        bot.sendMessage(chat_id, 'There are no words to {mode}'.format(mode=mode.name))
 
 
 def compose_kbd_start_mode(mode: Mode):
