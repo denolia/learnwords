@@ -2,6 +2,7 @@ import time
 
 import schedule
 import telepot
+import yaml
 
 import log_conf
 from enums import Mode
@@ -12,7 +13,6 @@ from words import add_word, show_next_word_to_repeat, check_how_many_to_mode, sh
 
 log = log_conf.get_logger(__name__)
 
-CHATS = [0, 0]
 BOT = None
 
 
@@ -74,16 +74,26 @@ def on_callback_query(msg):
 
 
 def job():
-    if BOT is not None:
-        for chat in CHATS:
-            bot.sendMessage(chat, 'Hey! Time to learn something'
-                                  '\nOr maybe you have found new words for me? ^__^')
-            log.debug("sent scheduled message to chat {}".format(chat))
+    if BOT is None:
+        return
+
+    with open("config.yaml", 'r') as stream:
+        config = yaml.load(stream)
+
+    chats = config.get('chats')
+
+    for chat in chats:
+        bot.sendMessage(chat, 'Hey! Time to learn something'
+                              '\nOr maybe you have found new words for me? ^__^')
+        log.debug("sent scheduled message to chat {}".format(chat))
 
 
 if __name__ == '__main__':
-    TOKEN = 'TOKEN'
-    schedule.every().day.at("7:00").do(job)
+
+    with open("config.yaml", 'r') as stream:
+        config = yaml.load(stream)
+
+    TOKEN = config.get('token')
 
     bot = telepot.Bot(TOKEN)
     BOT = bot
@@ -92,6 +102,8 @@ if __name__ == '__main__':
     bot.message_loop({'chat': handle,
                       'callback_query': on_callback_query})
     log.info('Listening ...')
+
+    schedule.every().day.at("7:00").do(job)
 
     # Keep the program running.
     while 1:
