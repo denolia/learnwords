@@ -4,6 +4,7 @@ from pprint import pformat
 import telepot
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 
+from commands import get_operands, WORD_COMMAND, handle_error
 from db import add_word_for_user, get_one_word_to_repeat, count_words_to_mode, get_word_by_id, \
     set_learnt_word, get_one_word_to_learn, set_repeated_word, count_words, count_words_green
 from enums import Mode
@@ -23,26 +24,25 @@ def show_controls(bot, chat_id):
 
 
 def add_word(bot, msg, command, chat_id):
-    args = command.replace('/word', '').strip().split(";")
-    word = args[0].strip()
     date = msg['date']
     username = msg['from']['username']
+    args = get_operands(WORD_COMMAND, command)
+    word = args[0]
 
-    if word is "":
-        bot.sendMessage(chat_id=chat_id, text="Формат: /word word [; перевод; произношение]."
-                                              "\nПример: /word cat; котик; кЭт")
+    if word is None:
+        handle_error(bot, chat_id, WORD_COMMAND)
         return
-    translation = args[1].strip() if len(args) > 1 else None
-    pronunciation = args[2].strip() if len(args) > 2 else None
+
+    translation = args[1]
+    pronunciation = args[2]
 
     try:
         add_word_for_user(word, translation, pronunciation, date, 0, username)
         bot.sendMessage(chat_id, 'The word is added')
-        logging.info("Added word: {} {} {} for user {}".format(word, translation, pronunciation, username))
+        logging.info("Added word: {word} {translation} {pronunciation} for user {user}"
+                     "".format(word=word, translation=translation, pronunciation=pronunciation, user=username))
     except Exception as e:
-        bot.sendMessage(chat_id, 'Cannot insert word: {}'.format(e))
-        print("Cannot insert")
-        logging.error(e)
+        handle_error(bot, chat_id, WORD_COMMAND, 'Cannot insert word', e)
         raise e
 
 

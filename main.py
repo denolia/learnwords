@@ -5,6 +5,7 @@ import telepot
 import yaml
 
 import log_conf
+from commands import WORD_COMMAND, SHOW_ALL_COMMAND
 from enums import Mode
 from words import add_word, show_next_word_to_repeat, check_how_many_to_mode, show_translation_to_learn, \
     update_word_learn, stop_lesson, \
@@ -28,12 +29,11 @@ def handle(msg):
         return
 
     command = msg['text'].strip().lower()
-    date = msg['date']
     if command == '/start':
         show_controls(bot, chat_id)
-    elif command.startswith('/word'):
+    elif command.startswith(WORD_COMMAND.command):
         add_word(bot, msg, command, chat_id)
-    elif command == '/showall':
+    elif command == SHOW_ALL_COMMAND.name:
         bot.sendMessage(chat_id, str("not implemented yet"))
     elif command == 'start learning':
         check_how_many_to_mode(bot, chat_id, username, Mode.learn)
